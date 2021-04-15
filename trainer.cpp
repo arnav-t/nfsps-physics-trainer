@@ -15,16 +15,27 @@ const DWORD AX = 0xfff980;
 const DWORD AY = 0xfff984;
 const DWORD AZ = 0xfff988;
 
-// const DWORD DMG_FUNC_EPILOGUE = 0x6b1414;
-const DWORD DMG_FUNC_JNE = 0x6b1368;
-const DWORD DMG_SUBR_JE = 0x4ceb3f;
 
-// Jump to an intermediary conditional short jump to end of function. No wastage of bytes!
-std::vector<unsigned char> D1_OG{0x75, 0x27};
-std::vector<unsigned char> D1{0x75, 0x4a};
-
-std::vector<unsigned char> D2_OG{0x74};
-std::vector<unsigned char> D2{0xeb};
+const DWORD DMG_CODECAVE = 0x4d2d86;
+const DWORD DMG_FUNC = 0x4ce8c0;
+std::vector<unsigned char> DMG_JMP_OG = {
+  0x83, 0xec, 0x18,                     // sub esp, 18
+  0x8b, 0x44, 0x24, 0x1c,               // mov eax, [esp+1c]
+};
+std::vector<unsigned char> DMG_JMP = {
+  0xe9, 0xc1, 0x44, 0x00, 0x00,         // jmp DMG_CODECAVE
+  0x90,                                 // nop
+  0x90,                                 // nop
+};
+std::vector<unsigned char> DMG = {
+  0x8b, 0x0d, 0x48, 0xf8, 0xa6, 0x00,   // mov ecx, [00a6f848]
+  0x39, 0x4c, 0x24, 0x04,               // cmp [esp+4], ecx
+  0x75, 0x03,                           // jne short +3
+  0xc2, 0x00, 0x00,                     // ret 0
+  0x83, 0xec, 0x18,                     // sub esp, 18
+  0x8b, 0x44, 0x24, 0x1c,               // mov eax, [esp+1c]
+  0xe9, 0x24, 0xbb, 0xff, 0xff,         // jmp 4ce8c5
+};
 
 
 class Trainer {
@@ -109,14 +120,13 @@ public:
 
   void enable_no_dmg() {
     no_dmg = true;
-    write_byte_array(D1, DMG_FUNC_JNE);
-    write_byte_array(D2, DMG_SUBR_JE);
+    write_byte_array(DMG, DMG_CODECAVE);
+    write_byte_array(DMG_JMP, DMG_FUNC);
   }
 
   void disable_no_dmg() {
     no_dmg = false;
-    write_byte_array(D1_OG, DMG_FUNC_JNE);
-    write_byte_array(D2_OG, DMG_SUBR_JE);
+    write_byte_array(DMG_JMP_OG, DMG_FUNC);
   }
 
   void loop() {
