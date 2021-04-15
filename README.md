@@ -9,6 +9,6 @@
 - Numpad 8: 2x Speed
 - Numpad +: Enable/Disable No Damage\*
 
-\**Might not work 100% of the time, intentional design choice which allows imparting damage to opponents, but not to yourself*
+\**Use this in tandem with car slam to takedown opponents!*
 
 
